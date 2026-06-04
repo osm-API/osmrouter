@@ -2,13 +2,13 @@
 
 # osmRouter
 
-**Expose any local service at a public HTTPS URL — on a domain you own.**
+**Expose any local service at a public URL — on a domain you own.**
 
 Run a server on your machine, point osmRouter at its port, and get a live
-`https://` URL anyone can reach. Your machine dials out, so it works behind NAT,
+public address anyone can reach. Your machine dials out, so it works behind NAT,
 firewalls, and CGNAT with **no inbound ports**.
 
-[Website](https://osmrouter.com) · [Docs](https://docs.osmrouter.com) · [Dashboard](https://app.osmrouter.com) · [Status](https://status.osmrouter.com)
+[Website](https://osmrouter.com) · [Docs](https://docs.osmrouter.com) · [Dashboard](https://app.osmrouter.com) · [Status](https://status.osmrouter.com) · [Changelog](https://docs.osmrouter.com/changelog)
 
 </div>
 
@@ -19,10 +19,19 @@ This repository contains the **osmRouter CLI**, **SDK examples**, and a
 
 ## Install
 
-macOS or Linux:
+osmRouter ships native binaries for **macOS, Linux, and Windows** on `amd64`
+and `arm64`. The installers verify the download's SHA-256 checksum.
+
+**macOS / Linux**
 
 ```sh
 curl -fsSL https://osmrouter.com/install.sh | sh
+```
+
+**Windows** (PowerShell)
+
+```powershell
+irm https://osmrouter.com/install.ps1 | iex
 ```
 
 Verify:
@@ -31,7 +40,8 @@ Verify:
 osmrouter version
 ```
 
-> Windows isn't supported directly yet — use WSL, or the [Node SDK](#node-sdk).
+> Prefer a package? `npm install @omsapi/osmrouter` ships the same binary for all
+> three OSes — see [Node SDK](#node-sdk).
 
 ## 60-second quickstart
 
@@ -39,7 +49,8 @@ osmrouter version
    open **Tokens**, and create one (looks like `osm_xxxxx`).
 2. **Export it.**
    ```sh
-   export OSM_TOKEN=osm_xxxxx
+   export OSM_TOKEN=osm_xxxxx            # macOS / Linux
+   $env:OSM_TOKEN = "osm_xxxxx"          # Windows PowerShell
    ```
 3. **Tunnel a local port.**
    ```sh
@@ -47,38 +58,70 @@ osmrouter version
    # → Forwarding https://happy-tiger.osmrouter.com → localhost:8080
    ```
 
-That URL is live on the public internet over HTTPS, immediately.
+## Commands
 
-## Pin a stable URL
+| Command | Description |
+| --- | --- |
+| `osmrouter http <port>` | Expose a local HTTP service at a public HTTPS URL |
+| `osmrouter tcp <port>` | Expose a raw TCP service at `tunnel.<domain>:<port>` |
+| `osmrouter version` | Print the installed version |
+| `osmrouter help` | Show usage |
 
-By default each run gets a random name. Pin a subdomain so the URL survives
-restarts (ideal for webhooks):
+## HTTP tunnels
+
+```sh
+osmrouter http 8080
+# → https://<random>.osmrouter.com
+```
+
+**Pin a stable URL** (great for webhooks):
 
 ```sh
 OSM_SUBDOMAIN=my-app osmrouter http 8080
 # → https://my-app.osmrouter.com
 ```
 
-## Commands
+**Protect with Basic Auth** — a username/password gate enforced at the edge:
 
-| Command | Description |
-| --- | --- |
-| `osmrouter http <port>` | Expose a local HTTP service at a public HTTPS URL |
-| `osmrouter version` | Print the installed version |
-| `osmrouter help` | Show usage |
+```sh
+OSM_BASIC_AUTH=alice:s3cret osmrouter http 8080
+# visitors without valid credentials get a 401
+```
+
+WebSockets, Server-Sent Events, and chunked/streaming bodies pass through with
+**no wall-clock timeout** — good for streaming LLMs (Ollama, vLLM, llama-server).
+
+## TCP tunnels
+
+Expose a raw TCP service — a database, SSH, a game server — at a public
+`tunnel.<domain>:<port>`. The port is allocated for you:
+
+```sh
+osmrouter tcp 5432
+# → tunnel.osmrouter.com:10000  ->  localhost:5432
+```
+
+Connect like any TCP endpoint:
+
+```sh
+psql "host=tunnel.osmrouter.com port=10000 user=postgres"
+```
 
 ## Environment variables
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `OSM_TOKEN` | yes | — | Agent token (create one under Tokens) |
-| `OSM_SUBDOMAIN` | no | random | Pin a stable subdomain |
+| `OSM_SUBDOMAIN` | no | random | Pin a stable subdomain (http only) |
+| `OSM_BASIC_AUTH` | no | — | Protect an HTTP tunnel, as `user:pass` |
 | `OSM_DOMAIN` | no | `osmrouter.com` | A verified custom domain to serve under |
+| `OSM_API` | no | `https://api.<domain>` | Control-plane API (tcp port allocation) |
 | `OSM_RELAY` | no | `tunnel.osmrouter.com:8443` | Relay endpoint (self-hosting only) |
 
 ## Node SDK
 
-Open tunnels from code — handy in tests and preview environments:
+Open tunnels from code — handy in tests and preview environments. Works on
+macOS, Linux, and Windows:
 
 ```sh
 npm install @omsapi/osmrouter
@@ -94,19 +137,12 @@ await tunnel.close();
 
 See [`examples/`](./examples) and the [`cookbook/`](./cookbook) for more.
 
-## What flows through a tunnel
-
-Plain HTTP/HTTPS, **WebSockets**, **Server-Sent Events**, and chunked/streaming
-bodies — with **no wall-clock timeout**. That makes osmRouter a good fit for
-streaming LLM output (Ollama, vLLM, llama-server) and other long-lived
-connections, not just short requests.
-
 ## Links
 
 - 📚 **Docs:** https://docs.osmrouter.com
 - 🧪 **Examples:** [`examples/`](./examples)
 - 🍳 **Cookbook:** [`cookbook/`](./cookbook)
-- 💬 **Issues:** open one in this repo
+- 🗒️ **Changelog:** [`CHANGELOG.md`](./CHANGELOG.md)
 - 🏢 **Self-host / Enterprise:** https://osmrouter.com/pricing
 
 ## License
