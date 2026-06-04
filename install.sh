@@ -1,44 +1,138 @@
 #!/bin/sh
 # osmRouter CLI installer.  Usage:  curl -fsSL https://osmrouter.com/install.sh | sh
-set -e
+#
+# macOS and Linux (amd64/arm64). On Windows, use PowerShell instead:
+#   irm https://osmrouter.com/install.ps1 | iex
+#
+# Knobs (env): OSM_REPO, OSM_BINDIR, OSM_VERSION (default: latest),
+#              OSM_NO_VERIFY=1 to skip checksum verification.
+set -eu
 
 REPO="${OSM_REPO:-osm-API/osmrouter}"
 BINDIR="${OSM_BINDIR:-/usr/local/bin}"
+VERSION="${OSM_VERSION:-latest}"
 
+err() { echo "osmRouter: $*" >&2; }
+
+# --- temp file with guaranteed cleanup -------------------------------------
+TMP=$(mktemp 2>/dev/null || echo "/tmp/osmrouter.$$")
+SUMS=""
+cleanup() { rm -f "$TMP" "$SUMS" 2>/dev/null || true; }
+trap cleanup EXIT INT TERM
+
+# --- detect platform -------------------------------------------------------
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
+
 case "$ARCH" in
 	x86_64 | amd64) ARCH=amd64 ;;
 	aarch64 | arm64) ARCH=arm64 ;;
+	armv7* | armv6* | arm)
+		err "32-bit ARM is not supported yet (need arm64). Use the Node SDK: npm i @omsapi/osmrouter"
+		exit 1
+		;;
 	*)
-		echo "Unsupported architecture: $ARCH" >&2
+		err "unsupported architecture: $ARCH (need x86_64 or arm64)"
 		exit 1
 		;;
 esac
 
 case "$OS" in
 	linux | darwin) ;;
+	mingw* | msys* | cygwin* | windows*)
+		err "this script is for macOS/Linux. On Windows run in PowerShell:"
+		err "  irm https://osmrouter.com/install.ps1 | iex"
+		err "...or use WSL, or the Node SDK:  npm i @omsapi/osmrouter"
+		exit 1
+		;;
 	*)
-		echo "Unsupported OS: $OS (Windows: use WSL or the Node SDK)" >&2
+		err "unsupported OS: $OS"
 		exit 1
 		;;
 esac
 
-URL="https://github.com/${REPO}/releases/latest/download/osmrouter-${OS}-${ARCH}"
-echo "Downloading osmRouter for ${OS}/${ARCH}…"
-
-TMP=$(mktemp)
-curl -fsSL "$URL" -o "$TMP"
-chmod +x "$TMP"
-
-if [ -w "$BINDIR" ]; then
-	mv "$TMP" "$BINDIR/osmrouter"
+ASSET="osmrouter-${OS}-${ARCH}"
+if [ "$VERSION" = "latest" ]; then
+	BASE="https://github.com/${REPO}/releases/latest/download"
 else
-	echo "Installing to $BINDIR (needs sudo)…"
-	sudo mv "$TMP" "$BINDIR/osmrouter"
+	BASE="https://github.com/${REPO}/releases/download/${VERSION}"
 fi
 
-echo "Installed: $(command -v osmrouter)"
+# --- choose a downloader ---------------------------------------------------
+download() { # download <url> <dest>
+	if command -v curl >/dev/null 2>&1; then
+		curl -fsSL "$1" -o "$2"
+	elif command -v wget >/dev/null 2>&1; then
+		wget -q "$1" -O "$2"
+	else
+		err "need curl or wget installed."
+		exit 1
+	fi
+}
+
+echo "Downloading osmRouter (${OS}/${ARCH})…"
+if ! download "${BASE}/${ASSET}" "$TMP"; then
+	err "download failed from ${BASE}/${ASSET}"
+	err "see https://github.com/${REPO}/releases for available builds."
+	exit 1
+fi
+
+# --- sanity: a real binary is well over 1 MB (catches HTML error pages) -----
+SIZE=$(wc -c < "$TMP" 2>/dev/null | tr -d ' ')
+if [ "${SIZE:-0}" -lt 1000000 ]; then
+	err "downloaded file looks wrong (${SIZE:-0} bytes) — aborting."
+	err "the release asset may be missing; check https://github.com/${REPO}/releases"
+	exit 1
+fi
+
+# --- verify checksum (best-effort) -----------------------------------------
+if [ "${OSM_NO_VERIFY:-}" != "1" ]; then
+	SHACMD=""
+	if command -v sha256sum >/dev/null 2>&1; then SHACMD="sha256sum"
+	elif command -v shasum >/dev/null 2>&1; then SHACMD="shasum -a 256"; fi
+	if [ -n "$SHACMD" ]; then
+		SUMS=$(mktemp 2>/dev/null || echo "/tmp/osmrouter-sums.$$")
+		if download "${BASE}/checksums.txt" "$SUMS"; then
+			WANT=$(grep " ${ASSET}\$" "$SUMS" 2>/dev/null | awk '{print $1}')
+			GOT=$($SHACMD "$TMP" | awk '{print $1}')
+			if [ -n "$WANT" ] && [ "$WANT" != "$GOT" ]; then
+				err "checksum mismatch! expected $WANT, got $GOT — aborting."
+				exit 1
+			fi
+			[ -n "$WANT" ] && echo "Checksum verified."
+		fi
+	fi
+fi
+
+chmod +x "$TMP"
+
+# --- install (create dir, elevate only if needed) --------------------------
+TARGET="$BINDIR/osmrouter"
+if mkdir -p "$BINDIR" 2>/dev/null && [ -w "$BINDIR" ]; then
+	mv "$TMP" "$TARGET"
+elif command -v sudo >/dev/null 2>&1; then
+	echo "Installing to $BINDIR (needs sudo)…"
+	sudo mkdir -p "$BINDIR"
+	sudo mv "$TMP" "$TARGET"
+else
+	err "cannot write to $BINDIR and sudo is unavailable."
+	err "re-run with a writable dir, e.g.:  OSM_BINDIR=\$HOME/.local/bin sh"
+	exit 1
+fi
+trap - EXIT  # binary moved; nothing to clean
+
+echo "Installed: $TARGET"
+
+# --- PATH check ------------------------------------------------------------
+case ":${PATH}:" in
+	*":${BINDIR}:"*) ;;
+	*)
+		echo
+		echo "Note: $BINDIR is not on your PATH. Add it:"
+		echo "  export PATH=\"$BINDIR:\$PATH\"   # add to ~/.zshrc or ~/.bashrc"
+		;;
+esac
+
 echo
 echo "Next:"
 echo "  1. Create a token at https://app.osmrouter.com (Tokens)"
