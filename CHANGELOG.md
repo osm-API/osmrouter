@@ -2,6 +2,17 @@
 
 All notable changes to the osmRouter CLI are documented here.
 
+## v1.1.0 — 2026-06-05
+
+- **Raw TCP tunnels** — `osmrouter tcp <port>` exposes a TCP service (databases,
+  SSH, game servers) at `tunnel.<domain>:<port>`. The port is allocated for you.
+- **Basic Auth** — `OSM_BASIC_AUTH=user:pass` gates an HTTP tunnel behind a
+  username and password, enforced at the edge.
+- **Windows** — native binaries (`amd64`/`arm64`) plus a PowerShell installer:
+  `irm https://osmrouter.com/install.ps1 | iex`.
+- **Hardened installers** — SHA-256 checksum verification, curl/wget fallback,
+  and clearer errors.
+
 ## v1.0.0 — 2026-06-04
 
 The first public release.
