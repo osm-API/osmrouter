@@ -37,21 +37,49 @@ function works(p) {
 }
 
 function download(url, dest) {
+	// Download to a temp file and rename on success so a failed download never
+	// leaves a partial/0-byte binary at `dest`.
+	const tmp = `${dest}.download`;
 	return new Promise((resolve, reject) => {
-		const file = fs.createWriteStream(dest, { mode: 0o755 });
+		const file = fs.createWriteStream(tmp, { mode: 0o755 });
+		const cleanup = (err) => {
+			try {
+				file.destroy();
+			} catch {
+				/* ignore */
+			}
+			try {
+				fs.unlinkSync(tmp);
+			} catch {
+				/* ignore */
+			}
+			reject(err);
+		};
 		const go = (u, n = 0) => {
-			if (n > 6) return reject(new Error("too many redirects"));
+			if (n > 6) return cleanup(new Error("too many redirects"));
 			https
 				.get(u, { headers: { "user-agent": "osmrouter-desktop" } }, (res) => {
 					if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
 						res.resume();
 						return go(res.headers.location, n + 1);
 					}
-					if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
+					if (res.statusCode !== 200) {
+						res.resume();
+						return cleanup(new Error(`HTTP ${res.statusCode}`));
+					}
 					res.pipe(file);
-					file.on("finish", () => file.close(() => resolve(dest)));
+					file.on("finish", () =>
+						file.close(() => {
+							try {
+								fs.renameSync(tmp, dest);
+								resolve(dest);
+							} catch (e) {
+								cleanup(e);
+							}
+						}),
+					);
 				})
-				.on("error", reject);
+				.on("error", cleanup);
 		};
 		go(url);
 	});
