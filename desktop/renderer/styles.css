@@ -1,0 +1,379 @@
+:root {
+	--bg: #0a0a0a;
+	--surface: #141414;
+	--surface-hi: #1c1c1c;
+	--line: #262626;
+	--line-soft: #1f1f1f;
+	--ink: #fafafa;
+	--muted: #9b9b9b;
+	--brand: #ffd95a;
+	--brand-ink: #1a1505;
+	--ok: #28c840;
+	--err: #ff6b6b;
+	--radius: 12px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+		sans-serif;
+}
+
+* {
+	box-sizing: border-box;
+}
+html,
+body {
+	margin: 0;
+	height: 100%;
+	background: var(--bg);
+	color: var(--ink);
+	-webkit-font-smoothing: antialiased;
+	font-size: 14px;
+}
+.hidden {
+	display: none !important;
+}
+.muted {
+	color: var(--muted);
+}
+.error {
+	color: var(--err);
+	font-size: 13px;
+	min-height: 18px;
+	margin: 6px 0 0;
+}
+code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	background: var(--surface-hi);
+	padding: 1px 5px;
+	border-radius: 5px;
+	font-size: 0.9em;
+}
+
+button {
+	font: inherit;
+	cursor: pointer;
+	border-radius: 9px;
+	border: 1px solid var(--line);
+	background: var(--surface-hi);
+	color: var(--ink);
+	padding: 8px 14px;
+	transition: transform 0.05s ease, background 0.15s ease, border 0.15s ease;
+}
+button:hover {
+	background: #232323;
+}
+button:active {
+	transform: scale(0.98);
+}
+button.primary {
+	background: var(--brand);
+	color: var(--brand-ink);
+	border-color: var(--brand);
+	font-weight: 600;
+}
+button.primary:hover {
+	filter: brightness(1.05);
+}
+button.ghost {
+	background: transparent;
+}
+button.icon {
+	padding: 8px 10px;
+}
+button.block {
+	width: 100%;
+	margin-top: 10px;
+	padding: 11px;
+}
+button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+input {
+	font: inherit;
+	width: 100%;
+	background: var(--bg);
+	border: 1px solid var(--line);
+	color: var(--ink);
+	border-radius: 9px;
+	padding: 10px 12px;
+	outline: none;
+}
+input:focus {
+	border-color: #3a3a3a;
+}
+
+.brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+}
+.brand-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--brand);
+}
+
+.screen {
+	height: 100vh;
+	overflow: auto;
+}
+
+/* ---- Connect screen ---- */
+#screen-connect {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: radial-gradient(
+			40rem 26rem at 50% -10%,
+			rgba(255, 217, 90, 0.08),
+			transparent 70%
+		),
+		var(--bg);
+}
+.connect-card {
+	width: 420px;
+	max-width: calc(100vw - 40px);
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	padding: 28px;
+}
+.connect-card h1 {
+	font-size: 22px;
+	margin: 16px 0 6px;
+}
+.connect-card label {
+	display: block;
+	font-size: 12px;
+	color: var(--muted);
+	margin: 18px 0 6px;
+}
+.token-row {
+	display: flex;
+	gap: 8px;
+}
+.how {
+	margin-top: 20px;
+	border-top: 1px solid var(--line-soft);
+	padding-top: 14px;
+}
+.how summary {
+	cursor: pointer;
+	color: var(--brand);
+	font-size: 13px;
+}
+.how ol {
+	color: var(--muted);
+	font-size: 13px;
+	line-height: 1.7;
+	padding-left: 18px;
+}
+
+/* ---- Main screen ---- */
+.topbar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: 52px;
+	padding: 0 16px;
+	border-bottom: 1px solid var(--line);
+	background: var(--surface);
+	-webkit-app-region: drag;
+	padding-left: 88px;
+}
+.topbar button,
+.topbar .account {
+	-webkit-app-region: no-drag;
+}
+.spacer {
+	flex: 1;
+}
+.account {
+	font-size: 13px;
+}
+.content {
+	padding: 20px 22px 40px;
+	max-width: 880px;
+	margin: 0 auto;
+}
+.section-head {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	margin-bottom: 14px;
+}
+.section-head h2 {
+	font-size: 16px;
+	margin: 0;
+}
+.empty {
+	text-align: center;
+	padding: 40px;
+}
+
+/* ---- Port cards ---- */
+.ports {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.port {
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface);
+	overflow: hidden;
+}
+.port-row {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 14px 16px;
+}
+.port-num {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 15px;
+	font-weight: 600;
+	min-width: 64px;
+}
+.port-proc {
+	flex: 1;
+	min-width: 0;
+}
+.port-proc .name {
+	font-weight: 500;
+}
+.port-proc .addr {
+	font-size: 12px;
+	color: var(--muted);
+	font-family: ui-monospace, monospace;
+}
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	padding: 3px 9px;
+	border-radius: 999px;
+	border: 1px solid var(--line);
+	color: var(--muted);
+}
+.badge .dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--muted);
+}
+.badge.online {
+	color: var(--brand);
+	border-color: rgba(255, 217, 90, 0.3);
+	background: rgba(255, 217, 90, 0.08);
+}
+.badge.online .dot {
+	background: var(--ok);
+}
+.badge.connecting .dot {
+	background: var(--brand);
+	animation: pulse 1.2s infinite;
+}
+@keyframes pulse {
+	50% {
+		opacity: 0.3;
+	}
+}
+
+.port-detail {
+	border-top: 1px solid var(--line-soft);
+	padding: 14px 16px;
+	background: var(--bg);
+}
+.url-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+.url-row a {
+	color: var(--brand);
+	text-decoration: none;
+	font-family: ui-monospace, monospace;
+	font-size: 13px;
+	word-break: break-all;
+}
+.logs {
+	background: #060606;
+	border: 1px solid var(--line-soft);
+	border-radius: 9px;
+	padding: 10px 12px;
+	max-height: 220px;
+	overflow: auto;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.6;
+	color: #cfcfcf;
+}
+.logs .empty {
+	color: var(--muted);
+	padding: 0;
+}
+.logs .l .s2 {
+	color: var(--ok);
+}
+.logs .l .s4,
+.logs .l .s5 {
+	color: var(--err);
+}
+
+/* ---- Dialog ---- */
+.dialog-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.6);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 50;
+}
+.dialog {
+	width: 400px;
+	max-width: calc(100vw - 40px);
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: 16px;
+	padding: 22px;
+}
+.dialog h3 {
+	margin: 0 0 16px;
+	font-size: 17px;
+}
+.field {
+	margin-bottom: 14px;
+}
+.field label {
+	display: block;
+	font-size: 12px;
+	color: var(--muted);
+	margin-bottom: 6px;
+}
+.seg {
+	display: flex;
+	gap: 6px;
+}
+.seg-btn {
+	flex: 1;
+	text-align: center;
+}
+.seg-btn.active {
+	background: var(--brand);
+	color: var(--brand-ink);
+	border-color: var(--brand);
+	font-weight: 600;
+}
+.dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 18px;
+}

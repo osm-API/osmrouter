@@ -1,0 +1,45 @@
+# This file is published to the public repo as .github/workflows/desktop.yml.
+# Builds the osmRouter desktop app on macOS and Windows runners and uploads the
+# installers to the matching `desktop-v*` release. Run via the Actions tab
+# (workflow_dispatch) or by pushing a `desktop-v*` tag.
+name: desktop
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to upload to
+        default: desktop-v1.0.0
+  push:
+    tags: ["desktop-v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - { os: macos-latest, cmd: "dist:mac", glob: "desktop/release/*.dmg" }
+          - { os: windows-latest, cmd: "dist:win", glob: "desktop/release/*.exe" }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install
+        working-directory: desktop
+        run: npm install
+      - name: Build
+        working-directory: desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npm run ${{ matrix.cmd }}
+      - name: Upload to release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: gh release upload "$TAG" ${{ matrix.glob }} --clobber -R "${{ github.repository }}"
