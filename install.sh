@@ -4,13 +4,13 @@
 # macOS and Linux (amd64/arm64). On Windows, use PowerShell instead:
 #   irm https://osmrouter.com/install.ps1 | iex
 #
-# Knobs (env): OSM_REPO, OSM_BINDIR, OSM_VERSION (default: latest),
+# Knobs (env): OSM_REPO, OSM_BINDIR, OSM_VERSION (default: newest vX.Y.Z),
 #              OSM_NO_VERIFY=1 to skip checksum verification.
 set -eu
 
 REPO="${OSM_REPO:-osm-API/osmrouter}"
 BINDIR="${OSM_BINDIR:-/usr/local/bin}"
-VERSION="${OSM_VERSION:-latest}"
+VERSION="${OSM_VERSION:-}"
 
 err() { echo "osmRouter: $*" >&2; }
 
@@ -52,11 +52,25 @@ case "$OS" in
 esac
 
 ASSET="osmrouter-${OS}-${ARCH}"
-if [ "$VERSION" = "latest" ]; then
-	BASE="https://github.com/${REPO}/releases/latest/download"
-else
-	BASE="https://github.com/${REPO}/releases/download/${VERSION}"
+# --- resolve the CLI version --------------------------------------------------
+# The newest CLI release (tag vX.Y.Z). We resolve it explicitly via the API and
+# do NOT use /releases/latest — that pointer is shared with the desktop app's
+# `desktop-v*` releases, which don't contain CLI binaries.
+http_get() {
+	if command -v curl >/dev/null 2>&1; then
+		curl -fsSL "$1" 2>/dev/null
+	elif command -v wget >/dev/null 2>&1; then
+		wget -qO- "$1" 2>/dev/null
+	fi
+}
+if [ -z "$VERSION" ]; then
+	VERSION=$(http_get "https://api.github.com/repos/${REPO}/releases?per_page=30" |
+		grep -oE '"tag_name": *"v[0-9]+\.[0-9]+\.[0-9]+"' |
+		head -n 1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')
 fi
+# Fallback if the API is unreachable (rate-limited, offline).
+[ -z "$VERSION" ] && VERSION="v1.2.0"
+BASE="https://github.com/${REPO}/releases/download/${VERSION}"
 
 # --- choose a downloader ---------------------------------------------------
 download() { # download <url> <dest>

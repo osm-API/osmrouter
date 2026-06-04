@@ -14,7 +14,7 @@ try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::
 
 $Repo    = if ($env:OSM_REPO)    { $env:OSM_REPO }    else { "osm-API/osmrouter" }
 $BinDir  = if ($env:OSM_BINDIR)  { $env:OSM_BINDIR }  else { Join-Path $env:LOCALAPPDATA "osmRouter\bin" }
-$Version = if ($env:OSM_VERSION) { $env:OSM_VERSION } else { "latest" }
+$Version = if ($env:OSM_VERSION) { $env:OSM_VERSION } else { "" }
 
 # Detect architecture.
 $arch = switch ($env:PROCESSOR_ARCHITECTURE) {
@@ -24,12 +24,18 @@ $arch = switch ($env:PROCESSOR_ARCHITECTURE) {
 	default { "amd64" }
 }
 
-$asset = "osmrouter-windows-$arch.exe"
-$base  = if ($Version -eq "latest") {
-	"https://github.com/$Repo/releases/latest/download"
-} else {
-	"https://github.com/$Repo/releases/download/$Version"
+# Resolve the newest CLI release (tag vX.Y.Z) explicitly — /releases/latest is
+# shared with the desktop app's desktop-v* releases, which have no CLI binaries.
+if (-not $Version) {
+	try {
+		$rels = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases?per_page=30" -UseBasicParsing
+		$Version = ($rels | Where-Object { $_.tag_name -match '^v\d+\.\d+\.\d+$' } | Select-Object -First 1).tag_name
+	} catch { }
 }
+if (-not $Version) { $Version = "v1.2.0" }  # fallback if the API is unreachable
+
+$asset = "osmrouter-windows-$arch.exe"
+$base  = "https://github.com/$Repo/releases/download/$Version"
 
 $exe = Join-Path $BinDir "osmrouter.exe"
 $tmp = Join-Path $env:TEMP ("osmrouter-" + [Guid]::NewGuid().ToString("N") + ".exe")
