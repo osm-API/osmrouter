@@ -1,0 +1,27 @@
+{
+	"expo": {
+		"name": "osmRouter",
+		"slug": "osmrouter",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"userInterfaceStyle": "dark",
+		"backgroundColor": "#0a0a0a",
+		"icon": "./assets/icon.png",
+		"splash": {
+			"backgroundColor": "#0a0a0a",
+			"resizeMode": "contain",
+			"image": "./assets/icon.png"
+		},
+		"android": {
+			"package": "com.osmapi.osmrouter",
+			"versionCode": 1,
+			"permissions": [
+				"android.permission.INTERNET",
+				"android.permission.FOREGROUND_SERVICE",
+				"android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+				"android.permission.POST_NOTIFICATIONS",
+				"android.permission.WAKE_LOCK"
+			]
+		}
+	}
+}
