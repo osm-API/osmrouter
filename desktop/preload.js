@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("osm", {
 	tunnelState: () => ipcRenderer.invoke("tunnel:state"),
 	openExternal: (url) => ipcRenderer.invoke("util:openExternal", url),
 	copy: (text) => ipcRenderer.invoke("util:copy", text),
+	appVersion: () => ipcRenderer.invoke("app:version"),
 	onTunnelsUpdate: (cb) =>
 		ipcRenderer.on("tunnels:update", (_e, state) => cb(state)),
 });

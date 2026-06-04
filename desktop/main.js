@@ -131,3 +131,4 @@ ipcMain.handle("tunnel:state", () => tunnels.publicState());
 
 ipcMain.handle("util:openExternal", (_e, url) => shell.openExternal(url));
 ipcMain.handle("util:copy", (_e, text) => clipboard.writeText(String(text)));
+ipcMain.handle("app:version", () => app.getVersion());

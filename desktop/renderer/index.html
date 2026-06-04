@@ -10,12 +10,10 @@
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body>
-		<!-- ============ TOKEN / CONNECT SCREEN ============ -->
+		<!-- ============ CONNECT ============ -->
 		<section id="screen-connect" class="screen">
 			<div class="connect-card">
-				<div class="brand">
-					<span class="brand-dot"></span> osmRouter
-				</div>
+				<div class="brand"><span class="brand-dot"></span> osmRouter</div>
 				<h1>Connect your account</h1>
 				<p class="muted">
 					Paste your agent token to get started. The app uses it to open
@@ -24,16 +22,9 @@
 
 				<label for="token">Agent token</label>
 				<div class="token-row">
-					<input
-						id="token"
-						type="password"
-						placeholder="osm_xxxxxxxx"
-						autocomplete="off"
-						spellcheck="false"
-					/>
-					<button id="token-reveal" class="ghost icon" title="Show / hide">
-						👁
-					</button>
+					<input id="token" type="password" placeholder="osm_xxxxxxxx"
+						autocomplete="off" spellcheck="false" />
+					<button id="token-reveal" class="ghost icon" title="Show / hide">👁</button>
 				</div>
 				<div id="token-error" class="error"></div>
 				<button id="connect-btn" class="primary block">Connect</button>
@@ -41,53 +32,53 @@
 				<details class="how">
 					<summary>I don't have a token yet — how do I get one?</summary>
 					<ol>
-						<li>
-							Open the osmRouter dashboard and sign in (or create a free
-							account).
-						</li>
+						<li>Open the osmRouter dashboard and sign in (or create a free account).</li>
 						<li>Go to <strong>Tokens</strong> in the sidebar.</li>
-						<li>
-							Click <strong>Create token</strong>, name it (e.g. “desktop”),
-							and copy it — it looks like <code>osm_xxxx</code>.
-						</li>
+						<li>Click <strong>Create token</strong>, name it (e.g. “desktop”), and copy it — it looks like <code>osm_xxxx</code>.</li>
 						<li>Paste it above and click Connect.</li>
 					</ol>
-					<button id="open-tokens" class="ghost">
-						Open dashboard → Tokens ↗
-					</button>
+					<button id="open-tokens" class="ghost sm">Open dashboard → Tokens ↗</button>
 				</details>
 			</div>
 		</section>
 
-		<!-- ============ MAIN SCREEN ============ -->
+		<!-- ============ MAIN ============ -->
 		<section id="screen-main" class="screen hidden">
 			<header class="topbar">
 				<div class="brand"><span class="brand-dot"></span> osmRouter</div>
+				<div class="search"><input id="search" placeholder="Filter ports…" /></div>
 				<div class="spacer"></div>
-				<div id="account" class="account muted"></div>
-				<button id="refresh-btn" class="ghost icon" title="Refresh ports">
-					⟳
-				</button>
-				<button id="signout-btn" class="ghost">Disconnect</button>
+				<div id="account" class="chip"></div>
+				<button id="refresh-btn" class="ghost icon" title="Refresh ports">⟳</button>
+				<button id="settings-btn" class="ghost icon" title="Settings">⚙</button>
 			</header>
 
+			<div class="summary">
+				<div class="stat"><div id="sum-ports" class="n">0</div><div class="l">Listening ports</div></div>
+				<div class="stat"><div id="sum-tunnels" class="n brand">0</div><div class="l">Active tunnels</div></div>
+				<div class="stat"><div id="sum-reqs" class="n">0</div><div class="l">Requests</div></div>
+			</div>
+
 			<main class="content">
-				<div class="section-head">
-					<h2>Local ports</h2>
-					<span id="ports-count" class="muted"></span>
+				<div class="content-inner">
+					<div class="section-head">
+						<h2>Local ports</h2>
+					</div>
+					<div id="ports" class="ports"></div>
+					<div id="ports-empty" class="empty hidden">
+						<div class="big">No listening ports found</div>
+						Start a local server — a dev server, a database, an LLM — and hit
+						refresh (⟳).
+					</div>
 				</div>
-				<div id="ports" class="ports"></div>
-				<p id="ports-empty" class="muted empty hidden">
-					No listening ports found. Start a local server (a dev server, a
-					database, an LLM…) and hit refresh.
-				</p>
 			</main>
 		</section>
 
 		<!-- ============ TUNNEL DIALOG ============ -->
-		<div id="dialog" class="dialog-backdrop hidden">
-			<div class="dialog">
+		<div id="dialog" class="backdrop hidden">
+			<div class="modal">
 				<h3 id="dialog-title">Tunnel port</h3>
+				<p class="sub">Choose how to expose this port to the public internet.</p>
 				<div class="field">
 					<label>Protocol</label>
 					<div class="seg">
@@ -110,13 +101,32 @@
 					</div>
 				</div>
 				<p id="dialog-error" class="error"></p>
-				<div class="dialog-actions">
+				<div class="modal-actions">
 					<button id="dialog-cancel" class="ghost">Cancel</button>
 					<button id="dialog-start" class="primary">Start tunnel</button>
 				</div>
 			</div>
 		</div>
 
+		<!-- ============ SETTINGS ============ -->
+		<div id="settings" class="backdrop hidden">
+			<div class="modal">
+				<h3>Settings</h3>
+				<p class="sub">Account and app information.</p>
+				<div class="kv"><span class="k">Account</span><span id="set-email">—</span></div>
+				<div class="kv"><span class="k">Plan</span><span id="set-plan">—</span></div>
+				<div class="kv"><span class="k">App version</span><span id="set-version">—</span></div>
+				<div class="modal-actions" style="justify-content: space-between">
+					<button id="set-disconnect" class="ghost danger">Disconnect</button>
+					<div style="display:flex;gap:8px">
+						<button id="set-docs" class="ghost">Docs ↗</button>
+						<button id="settings-close" class="primary">Done</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="toasts"></div>
 		<script src="app.js"></script>
 	</body>
 </html>

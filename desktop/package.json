@@ -1,8 +1,8 @@
 {
 	"name": "osmrouter-desktop",
 	"productName": "osmRouter",
-	"version": "1.0.0",
-	"description": "osmRouter desktop — expose your local ports at public URLs.",
+	"version": "1.2.0",
+	"description": "osmRouter desktop \u2014 expose your local ports at public URLs.",
 	"author": "osmRouter <contact@osmapi.com>",
 	"homepage": "https://osmrouter.com",
 	"license": "MIT",
@@ -21,16 +21,34 @@
 	"build": {
 		"appId": "com.osmapi.osmrouter",
 		"productName": "osmRouter",
-		"directories": { "output": "release" },
-		"files": ["main.js", "preload.js", "lib/**", "renderer/**", "assets/**"],
-		"extraResources": [{ "from": "bin", "to": "bin" }],
+		"directories": {
+			"output": "release"
+		},
+		"files": [
+			"main.js",
+			"preload.js",
+			"lib/**",
+			"renderer/**",
+			"assets/**"
+		],
+		"extraResources": [
+			{
+				"from": "bin",
+				"to": "bin"
+			}
+		],
 		"mac": {
 			"category": "public.app-category.developer-tools",
-			"target": ["dmg", "zip"],
+			"target": [
+				"dmg",
+				"zip"
+			],
 			"icon": "assets/icon.png"
 		},
 		"win": {
-			"target": ["nsis"],
+			"target": [
+				"nsis"
+			],
 			"icon": "assets/icon.png"
 		},
 		"nsis": {
