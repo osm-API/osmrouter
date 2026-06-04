@@ -144,6 +144,7 @@ See [`examples/`](./examples) and the [`cookbook/`](./cookbook) for more.
 - 🍳 **Cookbook:** [`cookbook/`](./cookbook)
 - 🗒️ **Changelog:** [`CHANGELOG.md`](./CHANGELOG.md)
 - 🏢 **Self-host / Enterprise:** https://osmrouter.com/pricing
+- 📧 **Contact:** contact@osmapi.com
 
 ## License
 
