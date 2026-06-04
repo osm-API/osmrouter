@@ -1,0 +1,16 @@
+{
+	"name": "osmrouter-node-examples",
+	"private": true,
+	"type": "module",
+	"description": "Runnable osmRouter Node SDK examples",
+	"scripts": {
+		"start": "node basic.mjs",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@omsapi/osmrouter": "^1.0.0"
+	},
+	"devDependencies": {
+		"vitest": "^2.0.0"
+	}
+}
