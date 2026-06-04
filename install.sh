@@ -69,7 +69,7 @@ if [ -z "$VERSION" ]; then
 		head -n 1 | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+')
 fi
 # Fallback if the API is unreachable (rate-limited, offline).
-[ -z "$VERSION" ] && VERSION="v1.2.0"
+[ -z "$VERSION" ] && VERSION="v1.2.1"
 BASE="https://github.com/${REPO}/releases/download/${VERSION}"
 
 # --- choose a downloader ---------------------------------------------------

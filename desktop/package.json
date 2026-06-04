@@ -1,7 +1,7 @@
 {
 	"name": "osmrouter-desktop",
 	"productName": "osmRouter",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "osmRouter desktop \u2014 expose your local ports at public URLs.",
 	"author": "osmRouter <contact@osmapi.com>",
 	"homepage": "https://osmrouter.com",

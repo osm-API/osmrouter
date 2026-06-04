@@ -32,7 +32,7 @@ if (-not $Version) {
 		$Version = ($rels | Where-Object { $_.tag_name -match '^v\d+\.\d+\.\d+$' } | Select-Object -First 1).tag_name
 	} catch { }
 }
-if (-not $Version) { $Version = "v1.2.0" }  # fallback if the API is unreachable
+if (-not $Version) { $Version = "v1.2.1" }  # fallback if the API is unreachable
 
 $asset = "osmrouter-windows-$arch.exe"
 $base  = "https://github.com/$Repo/releases/download/$Version"
