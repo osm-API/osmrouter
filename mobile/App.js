@@ -148,6 +148,12 @@ export default function App() {
 				<Text style={s.muted}>
 					Paste your agent token to expose a port on this device at a public URL.
 				</Text>
+				{!Tunnel.isAvailable() && (
+					<Text style={[s.error, { marginTop: 12 }]}>
+						Heads up: the tunnel engine didn't load in this build. You can sign
+						in, but starting a tunnel won't work — please report this.
+					</Text>
+				)}
 				<Text style={s.label}>Agent token</Text>
 				<TextInput
 					style={s.input}

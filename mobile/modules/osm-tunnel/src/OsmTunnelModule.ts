@@ -15,7 +15,7 @@ export type StartParams = {
 	domain?: string;
 };
 
-declare class OsmTunnelModule extends NativeModule<OsmTunnelEvents> {
+export declare class OsmTunnelModule extends NativeModule<OsmTunnelEvents> {
 	getToken(): string;
 	setToken(token: string): void;
 	clearToken(): void;
@@ -23,4 +23,20 @@ declare class OsmTunnelModule extends NativeModule<OsmTunnelEvents> {
 	stop(): Promise<void>;
 }
 
-export default requireNativeModule<OsmTunnelModule>("OsmTunnel");
+// Resolve lazily. A top-level requireNativeModule() that throws would blank the
+// whole app at import time (white screen) before React ever renders. By
+// deferring resolution into a guarded getter, the UI always mounts and any
+// problem surfaces as an in-app message instead.
+let cached: OsmTunnelModule | null = null;
+let resolved = false;
+
+export function getNativeModule(): OsmTunnelModule | null {
+	if (resolved) return cached;
+	resolved = true;
+	try {
+		cached = requireNativeModule<OsmTunnelModule>("OsmTunnel");
+	} catch {
+		cached = null;
+	}
+	return cached;
+}
