@@ -32,11 +32,15 @@ class OsmTunnelModule : Module() {
 			i.putExtra("domain", opts["domain"] as? String ?: "")
 			if (Build.VERSION.SDK_INT >= 26) ctx.startForegroundService(i)
 			else ctx.startService(i)
+			// startService() yields a ComponentName, which Expo can't serialize
+			// back to JS ("Unknown type: ... ComponentName"). Return Unit instead.
+			Unit
 		}
 
 		AsyncFunction("stop") {
 			val ctx = ctx()
 			ctx.stopService(Intent(ctx, TunnelService::class.java))
+			Unit
 		}
 	}
 
