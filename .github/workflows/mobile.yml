@@ -9,7 +9,7 @@ on:
     inputs:
       tag:
         description: Release tag to upload to
-        default: mobile-v1.0.0
+        default: mobile-v1.0.1
   push:
     tags: ["mobile-v*"]
 
@@ -57,6 +57,14 @@ jobs:
           TAG: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
           APK=$(find mobile/android/app/build/outputs/apk -name "*.apk" | head -1)
-          echo "built: $APK"
-          cp "$APK" osmRouter-1.0.0-android.apk
-          gh release upload "$TAG" osmRouter-1.0.0-android.apk --clobber -R "${{ github.repository }}"
+          VERSION=$(node -p "require('./mobile/app.json').expo.version")
+          OUT="osmRouter-${VERSION}-android.apk"
+          echo "built: $APK -> $OUT"
+          cp "$APK" "$OUT"
+          # Drop any stale APK assets with a different version name on this release.
+          gh release view "$TAG" -R "${{ github.repository }}" --json assets \
+            -q '.assets[].name' 2>/dev/null | grep -E '\.apk$' | grep -vx "$OUT" \
+            | while read -r old; do
+                gh release delete-asset "$TAG" "$old" -y -R "${{ github.repository }}" || true
+              done
+          gh release upload "$TAG" "$OUT" --clobber -R "${{ github.repository }}"
