@@ -1,6 +1,6 @@
 {
-	"platforms": ["android"],
-	"android": {
-		"modules": ["com.osmapi.osmrouter.OsmTunnelModule"]
-	}
+  "platforms": ["android"],
+  "android": {
+    "modules": ["expo.modules.osmtunnel.OsmTunnelModule"]
+  }
 }

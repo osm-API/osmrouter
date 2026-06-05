@@ -1,7 +1,4 @@
-import { EventEmitter, requireNativeModule } from "expo-modules-core";
-
-const M = requireNativeModule("OsmTunnel");
-const emitter = new EventEmitter(M);
+import OsmTunnel, { StartParams } from "./src/OsmTunnelModule";
 
 export type StartOpts = {
 	proto: "http" | "tcp";
@@ -14,25 +11,42 @@ export type StartOpts = {
 };
 
 export function getToken(): Promise<string> {
-	return M.getToken();
+	return Promise.resolve(OsmTunnel.getToken());
 }
-export function setToken(t: string): Promise<void> {
-	return M.setToken(t);
+
+export function setToken(token: string): Promise<void> {
+	OsmTunnel.setToken(token);
+	return Promise.resolve();
 }
+
 export function clearToken(): Promise<void> {
-	return M.clearToken();
+	OsmTunnel.clearToken();
+	return Promise.resolve();
 }
+
 export function start(opts: StartOpts): Promise<void> {
-	return M.start(opts);
+	const params: StartParams = {
+		proto: opts.proto,
+		port: opts.port,
+		token: opts.token,
+		api: opts.api,
+		subdomain: opts.subdomain ?? "",
+		basicAuth: opts.basicAuth ?? "",
+		domain: opts.domain ?? "",
+	};
+	return OsmTunnel.start(params);
 }
+
 export function stop(): Promise<void> {
-	return M.stop();
+	return OsmTunnel.stop();
 }
+
 export function addLogListener(cb: (e: { line: string }) => void) {
-	return emitter.addListener("log", cb);
+	return OsmTunnel.addListener("log", cb);
 }
+
 export function addStatusListener(
 	cb: (e: { status: string; url?: string; error?: string }) => void,
 ) {
-	return emitter.addListener("status", cb);
+	return OsmTunnel.addListener("status", cb);
 }
