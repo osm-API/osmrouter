@@ -61,10 +61,12 @@ jobs:
           OUT="osmRouter-${VERSION}-android.apk"
           echo "built: $APK -> $OUT"
           cp "$APK" "$OUT"
-          # Drop any stale APK assets with a different version name on this release.
-          gh release view "$TAG" -R "${{ github.repository }}" --json assets \
-            -q '.assets[].name' 2>/dev/null | grep -E '\.apk$' | grep -vx "$OUT" \
-            | while read -r old; do
-                gh release delete-asset "$TAG" "$old" -y -R "${{ github.repository }}" || true
-              done
+          # Drop any stale APK assets with a different version name on this
+          # release. `|| true` guards the no-match case (grep exits 1) so
+          # pipefail doesn't abort the step before the upload below.
+          STALE=$(gh release view "$TAG" -R "${{ github.repository }}" --json assets \
+            -q '.assets[].name' 2>/dev/null | grep -E '\.apk$' | grep -vx "$OUT" || true)
+          for old in $STALE; do
+            gh release delete-asset "$TAG" "$old" -y -R "${{ github.repository }}" || true
+          done
           gh release upload "$TAG" "$OUT" --clobber -R "${{ github.repository }}"
